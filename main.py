@@ -70,7 +70,15 @@ async def user(ctx, username: str):
             recent_messages = user_data[-5:] if len(user_data) >= 5 else user_data
             recent_messages.reverse()
             recent_str = '\n'.join([f"{msg['message_time']}: {msg['content']}" for msg in recent_messages])
-            embed = discord.Embed(title=f"User: {username}", description=f"Total Messages: {total_messages}\nRecent Messages:\n{recent_str}", color=discord.Color.blue())
+            embed = discord.Embed(title=f"User: {username}", description=f"Total Messages: {total_messages}", color=discord.Color.blue())
+            embed.add_field(name="Recent Messages", value=f"{recent_str}")
+
+            with open('data/download/top.json', 'r') as top_file:
+                top_data = json.load(top_file)
+            sorted_users = sorted(top_data.items(), key=lambda item: item[1], reverse=True)
+            placement = next((rank + 1 for rank, (user, _) in enumerate(sorted_users) if user == username), "Not ranked")
+
+            embed.add_field(name="Leaderboard Placement", value=f"{placement}", inline=False)
             
             if cache_time:
                 now = datetime.now()
@@ -144,9 +152,9 @@ async def download_json(url, filename):
 async def download_data():
     global cache_time
     urls = [
-        ("http://nuh.pet/top.json", "data/download/top.json"),
-        ("http://nuh.pet/users", "data/download/users.json"),
-        ("http://nuh.pet/total.json", "data/download/total.json")
+        ("http://45.88.188.104:6052/top.json", "data/download/top.json"),
+        ("http://45.88.188.104:6052/users", "data/download/users.json"),
+        ("http://45.88.188.104:6052/total.json", "data/download/total.json")
     ]
     for url, filename in urls:
         await download_json(url, filename)
